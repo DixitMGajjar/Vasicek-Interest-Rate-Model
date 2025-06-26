@@ -26,8 +26,9 @@ vasicek_model.py – main script
 README.md – this file
 
 **to run
-pip install pandas numpy yfinance scipy matplotlib
-python vasicek_model.py**
+pip install pandas numpy yfinance scipy matplotlib**
+
+**python vasicek_model.py**
 
 
 Output
