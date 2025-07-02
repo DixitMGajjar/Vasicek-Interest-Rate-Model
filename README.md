@@ -1,41 +1,65 @@
-# Vasicek-Interest-Rate-Model
+# Vasicek Interest Rate Model
 
-Vasicek Interest Rate Model (Python)
-This project implements the Vasicek short-rate model using historical 3-month Treasury Bill data (^IRX) from Yahoo Finance.
+Simple Python implementation for calibrating and simulating the Vasicek short-rate model using historical data.
 
-It includes:
+## What it does
 
-Parameter estimation via Maximum Likelihood
+Downloads interest rate data, fits the Vasicek model parameters, and runs Monte Carlo simulations to forecast rate paths. The model assumes rates follow:
 
-Interest rate simulation using Monte Carlo
+```
+dr = a(b - r)dt + σ dW
+```
 
-Visualization of simulated paths
+Where:
+- `a` = mean reversion speed
+- `b` = long-term average rate  
+- `σ` = volatility
 
- How it works
-Data Download: Pulls historical T-bill rates using yfinance.
+## Setup
 
-Model Calibration: Estimates a, b, and σ using historical rate changes.
+You'll need these packages:
+```bash
+pip install pandas numpy yfinance scipy matplotlib
+```
 
-Simulation: Generates interest rate paths under the Vasicek dynamics.
+## Basic usage
 
-Plotting: Visualizes the first 50 of 10,000 simulated paths.
+```python
+# Get data and calibrate
+data = dwnld_cln_data("^IRX", "2023-01-01", "2024-12-01")
+a, b, sigma = calibrate_vasicek(data)
 
- Files
-vasicek_model.py – main script
+# Run simulation
+r0 = data["actual_IRX"].iloc[-1]
+paths = simulate_vasicek_paths(r0, a, b, sigma, T=1, n_steps=252, n_paths=5000)
 
-README.md – this file
+# Plot results
+plot_paths(paths, n_plot=50)
+```
 
-**to run**
+## What the parameters mean
 
+- **a (0.1-2.0)**: How fast rates snap back to the long-term average. Higher = faster mean reversion
+- **b (0.02-0.08)**: Where rates settle in the long run. Usually matches historical average
+- **σ (0.01-0.3)**: How much randomness/volatility in day-to-day moves
 
-**pip install pandas numpy yfinance scipy matplotlib**
+## Things to know
 
+The Vasicek model can produce negative rates, which might or might not be realistic depending on your use case. It's simple and fast but assumes constant volatility.
 
-**python vasicek_model.py**
+Works best with:
+- At least 6 months of daily data
+- Periods without major regime changes
+- Short to medium-term forecasting (1-3 years)
 
+The calibration uses maximum likelihood estimation and should converge automatically. If you get weird parameters, try a different date range or check your data quality.
 
-Output
-Prints estimated Vasicek parameters
+## File structure
 
-Shows a plot of interest rate simulations over 1 year (252 steps)
+Main functions:
+- `dwnld_cln_data()` - gets and cleans Yahoo Finance data
+- `calibrate_vasicek()` - estimates model parameters  
+- `simulate_vasicek_paths()` - runs Monte Carlo simulation
+- `plot_paths()` - makes charts of the results
 
+That's pretty much it. The code is straightforward and you can easily modify the date ranges, simulation parameters, or add your own data sources.
